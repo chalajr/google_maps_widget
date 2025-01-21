@@ -384,8 +384,9 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
         ),
       );
     }
-
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// Build polylines from [_sourceLatLng] to [_destinationLatLng].
@@ -428,8 +429,9 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
       widget.totalTimeCallback?.call(result.totalDuration);
       widget.totalDistanceCallback?.call(result.totalDistance);
     }
-
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// This function uses [GoogleMapsWidget.driverCoordinatesStream] which
@@ -469,8 +471,9 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
           title: driverMarker.infoWindowTitle,
         ),
       );
-
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
