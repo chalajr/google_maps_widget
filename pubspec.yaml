@@ -11,8 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  dio: ^5.0.0
-  google_maps_flutter: ^2.2.1
+  dio: 
+  google_maps_flutter: 
 
 dev_dependencies:
   flutter_lints: ^2.0.1
