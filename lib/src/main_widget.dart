@@ -15,7 +15,7 @@ class GoogleMapsWidget extends StatefulWidget {
   const GoogleMapsWidget({
     Key? key,
     required this.apiKey,
-    required this.sourceLatLng,
+    this.sourceLatLng,
     required this.destinationLatLng,
     this.totalDistanceCallback,
     this.totalTimeCallback,
@@ -68,7 +68,7 @@ class GoogleMapsWidget extends StatefulWidget {
   final String apiKey;
 
   /// The source [LatLng].
-  final LatLng sourceLatLng;
+  final LatLng? sourceLatLng;
 
   /// The destination [LatLng].
   final LatLng destinationLatLng;
@@ -316,7 +316,7 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
   Future<GoogleMapController> getGoogleMapsController() =>
       _mapsControllerCompleter.future;
 
-  Future<void> setSourceLatLng(LatLng sourceLatLng) async {
+  Future<void> setSourceLatLng(LatLng? sourceLatLng) async {
     if (_sourceLatLng == sourceLatLng) return;
 
     _sourceLatLng = sourceLatLng;
@@ -336,31 +336,33 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
   StreamSubscription<LatLng>? _driverCoordinatesStreamSubscription;
 
-  late LatLng _sourceLatLng;
+  late LatLng? _sourceLatLng;
   late LatLng _destinationLatLng;
 
   /// setting source and destination markers
   void _setSourceDestinationMarkers() async {
     _markersMap.remove(MarkerIconInfo.sourceMarkerId);
 
-    final sourceMarker = widget.sourceMarkerIconInfo;
-    if (sourceMarker.isVisible) {
-      _markersMap[MarkerIconInfo.sourceMarkerId] = Marker(
-        markerId: MarkerIconInfo.sourceMarkerId,
-        position: _sourceLatLng,
-        anchor: sourceMarker.anchor,
-        rotation: sourceMarker.rotation,
-        icon: await sourceMarker.bitmapDescriptor,
-        onTap: sourceMarker.onTapMarker == null
-            ? null
-            : () => sourceMarker.onTapMarker!(_sourceLatLng),
-        infoWindow: InfoWindow(
-          onTap: sourceMarker.onTapInfoWindow == null
+    if (_sourceLatLng != null) {
+      final sourceMarker = widget.sourceMarkerIconInfo;
+      if (sourceMarker.isVisible) {
+        _markersMap[MarkerIconInfo.sourceMarkerId] = Marker(
+          markerId: MarkerIconInfo.sourceMarkerId,
+          position: _sourceLatLng!,
+          anchor: sourceMarker.anchor,
+          rotation: sourceMarker.rotation,
+          icon: await sourceMarker.bitmapDescriptor,
+          onTap: sourceMarker.onTapMarker == null
               ? null
-              : () => sourceMarker.onTapInfoWindow!(_sourceLatLng),
-          title: sourceMarker.infoWindowTitle,
-        ),
-      );
+              : () => sourceMarker.onTapMarker!(_sourceLatLng!),
+          infoWindow: InfoWindow(
+            onTap: sourceMarker.onTapInfoWindow == null
+                ? null
+                : () => sourceMarker.onTapInfoWindow!(_sourceLatLng!),
+            title: sourceMarker.infoWindowTitle,
+          ),
+        );
+      }
     }
 
     _markersMap.remove(MarkerIconInfo.destinationMarkerId);
@@ -395,7 +397,7 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
     final result = await Direction.getDirections(
       googleMapsApiKey: widget.apiKey,
-      origin: driverLoc ?? _sourceLatLng,
+      origin: driverLoc ?? _sourceLatLng!,
       destination: _destinationLatLng,
     );
 
@@ -506,7 +508,8 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
   Widget build(BuildContext context) {
     return GoogleMap(
       initialCameraPosition: CameraPosition(
-        target: widget.defaultCameraLocation ?? _sourceLatLng,
+        target:
+            widget.defaultCameraLocation ?? _sourceLatLng ?? _destinationLatLng,
         zoom: widget.defaultCameraZoom,
       ),
       markers: {..._markersMap.values, ...widget.markers},
