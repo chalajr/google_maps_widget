@@ -393,47 +393,48 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
   /// Build polylines from [_sourceLatLng] to [_destinationLatLng].
   Future<void> _buildPolyLines({LatLng? driverLoc}) async {
-    if (_sourceLatLng == null) return;
-    if (!widget.showPolyline) return;
+    if (_sourceLatLng != null) {
+      if (!widget.showPolyline) return;
 
-    final result = await Direction.getDirections(
-      googleMapsApiKey: widget.apiKey,
-      origin: driverLoc ?? _sourceLatLng!,
-      destination: _destinationLatLng,
-    );
-
-    final polylineCoordinates = <LatLng>[];
-
-    if (result != null && result.polylinePoints.isNotEmpty) {
-      polylineCoordinates.addAll(result.polylinePoints);
-    }
-
-    final polyline = Polyline(
-      polylineId: const PolylineId('default-polyline'),
-      color: widget.routeColor,
-      width: widget.routeWidth,
-      points: polylineCoordinates,
-    );
-
-    widget.onPolylineUpdate?.call(polyline);
-
-    if (driverLoc != null) _polylines.clear();
-    _polylines.add(polyline);
-
-    // setting map such as both source and
-    // destinations markers can be seen
-    if (result != null) {
-      final controller = await getGoogleMapsController();
-
-      controller.animateCamera(
-        CameraUpdate.newLatLngBounds(result.bounds, 32),
+      final result = await Direction.getDirections(
+        googleMapsApiKey: widget.apiKey,
+        origin: driverLoc ?? _sourceLatLng!,
+        destination: _destinationLatLng,
       );
 
-      widget.totalTimeCallback?.call(result.totalDuration);
-      widget.totalDistanceCallback?.call(result.totalDistance);
-    }
-    if (mounted) {
-      setState(() {});
+      final polylineCoordinates = <LatLng>[];
+
+      if (result != null && result.polylinePoints.isNotEmpty) {
+        polylineCoordinates.addAll(result.polylinePoints);
+      }
+
+      final polyline = Polyline(
+        polylineId: const PolylineId('default-polyline'),
+        color: widget.routeColor,
+        width: widget.routeWidth,
+        points: polylineCoordinates,
+      );
+
+      widget.onPolylineUpdate?.call(polyline);
+
+      if (driverLoc != null) _polylines.clear();
+      _polylines.add(polyline);
+
+      // setting map such as both source and
+      // destinations markers can be seen
+      if (result != null) {
+        final controller = await getGoogleMapsController();
+
+        controller.animateCamera(
+          CameraUpdate.newLatLngBounds(result.bounds, 32),
+        );
+
+        widget.totalTimeCallback?.call(result.totalDuration);
+        widget.totalDistanceCallback?.call(result.totalDistance);
+      }
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
