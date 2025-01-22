@@ -393,7 +393,7 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
   /// Build polylines from [_sourceLatLng] to [_destinationLatLng].
   Future<void> _buildPolyLines({LatLng? driverLoc}) async {
-    if (!widget.showPolyline) return;
+    if (!widget.showPolyline || _sourceLatLng == null) return;
 
     final result = await Direction.getDirections(
       googleMapsApiKey: widget.apiKey,
