@@ -336,29 +336,29 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
   StreamSubscription<LatLng>? _driverCoordinatesStreamSubscription;
 
-  late LatLng? _sourceLatLng;
+  late LatLng _sourceLatLng;
   late LatLng _destinationLatLng;
 
   /// setting source and destination markers
   void _setSourceDestinationMarkers() async {
     _markersMap.remove(MarkerIconInfo.sourceMarkerId);
 
-    if (_sourceLatLng != null) {
+    if (_sourceLatLng == LatLng(0, 0)) {
       final sourceMarker = widget.sourceMarkerIconInfo;
       if (sourceMarker.isVisible) {
         _markersMap[MarkerIconInfo.sourceMarkerId] = Marker(
           markerId: MarkerIconInfo.sourceMarkerId,
-          position: _sourceLatLng!,
+          position: _sourceLatLng,
           anchor: sourceMarker.anchor,
           rotation: sourceMarker.rotation,
           icon: await sourceMarker.bitmapDescriptor,
           onTap: sourceMarker.onTapMarker == null
               ? null
-              : () => sourceMarker.onTapMarker!(_sourceLatLng!),
+              : () => sourceMarker.onTapMarker!(_sourceLatLng),
           infoWindow: InfoWindow(
             onTap: sourceMarker.onTapInfoWindow == null
                 ? null
-                : () => sourceMarker.onTapInfoWindow!(_sourceLatLng!),
+                : () => sourceMarker.onTapInfoWindow!(_sourceLatLng),
             title: sourceMarker.infoWindowTitle,
           ),
         );
@@ -393,12 +393,12 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
 
   /// Build polylines from [_sourceLatLng] to [_destinationLatLng].
   Future<void> _buildPolyLines({LatLng? driverLoc}) async {
-    if (_sourceLatLng != null) {
+    if (_sourceLatLng == LatLng(0, 0)) {
       if (!widget.showPolyline) return;
 
       final result = await Direction.getDirections(
         googleMapsApiKey: widget.apiKey,
-        origin: driverLoc ?? _sourceLatLng!,
+        origin: driverLoc ?? _sourceLatLng,
         destination: _destinationLatLng,
       );
 
@@ -511,7 +511,7 @@ class GoogleMapsWidgetState extends State<GoogleMapsWidget> {
     return GoogleMap(
       initialCameraPosition: CameraPosition(
         target:
-            widget.defaultCameraLocation ?? _sourceLatLng ?? _destinationLatLng,
+            _sourceLatLng == LatLng(0, 0) ? _sourceLatLng : _destinationLatLng,
         zoom: widget.defaultCameraZoom,
       ),
       markers: {..._markersMap.values, ...widget.markers},
